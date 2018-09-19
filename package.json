@@ -1,0 +1,29 @@
+{
+  "name": "simple-ot",
+  "version": "1.0.0",
+  "description": "Operational transform using the GOTO control algorithm",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "author": "Russell Clarey",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^23.1.3",
+    "jest": "^23.1.0",
+    "ts-jest": "^22.4.6",
+    "tslint": "^5.10.0",
+    "tslint-config-airbnb": "^5.9.2",
+    "typescript": "^2.9.2"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coverageDirectory": "<rootDir>/coverage/",
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "testRegex": "test/.*\\.test\\.ts",
+    "moduleFileExtensions": ["ts", "js"],
+    "modulePaths": ["<rootDir>/src/"]
+  }
+}
