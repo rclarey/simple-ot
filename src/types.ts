@@ -13,41 +13,45 @@ export class Operation {
   /** Auxillary position information to allow IT/ET to be reversible */
   public auxPos: number;
   /**
-   * @param {OperationType} t - the type of operation; either insert or delete. This is needed
+   * @param {OperationType} type - the type of operation; either insert or delete. This is needed
    *   for type information to be preserved when sending operations to and from a server
-   * @param {number} p - the position of this operation as an offset from the beginning
+   * @param {number} position - the position of this operation as an offset from the beginning
    *   of the document
-   * @param {number} ts - a Unix timestamp of when this operation was initially created
-   * @param {Operation[]} hb - the context this operation was created in
+   * @param {number} id - a unique identifier for this operation
+   * @param {number} siteID - the id of the site where this operation was generated
+   * @param {Operation[]} historyBuffer - the context this operation was created in
    * @param {boolean} isNoop - whether this operation actually is a no-op
    */
   protected constructor(
-    public t: OperationType,
-    public p: number,
-    public ts: number,
-    public hb: Operation[],
+    public type: OperationType,
+    public position: number,
+    public id: number,
+    public siteID: number,
+    public historyBuffer: Operation[],
     public isNoop: boolean,
   ) {
-    this.auxPos = p;
+    this.auxPos = position;
   }
 }
 
 /** An insert operation */
 export class Insert extends Operation {
   /**
-   * @param {string} c - the character this operation inserts
+   * @param {string} char - the character this operation inserts
    * @param {number} position - where the operation starts in the document
-   * @param {number} timestamp - a Unix timestamp of when this operation was initially created
+   * @param {number} id - a unique identifier for this operation
+   * @param {number} siteId - the id of the site where this operation was generated
    * @param {Operation[]} histroyBuffer - the context this operation was created in
    */
   constructor(
-    public c: string,
+    public char: string,
     position: number,
-    timestamp: number,
+    id: number,
+    siteId: number,
     historyBuffer: Operation[],
     isNoop: boolean = false,
   ) {
-    super(OperationType.INSERT, position, timestamp, historyBuffer, isNoop);
+    super(OperationType.INSERT, position, id, siteId, historyBuffer, isNoop);
   }
 }
 
@@ -55,15 +59,17 @@ export class Insert extends Operation {
 export class Delete extends Operation {
   /**
    * @param {number} position - where the operation starts in the document
-   * @param {number} timestamp - a Unix timestamp of when this operation was initially created
+   * @param {number} id - a unique identifier for this operation
+   * @param {number} siteId - the id of the site where this operation was generated
    * @param {Operation[]} histroyBuffer - the context this operation was created in
    */
   constructor(
     position: number,
-    timestamp: number,
+    id: number,
+    siteId: number,
     historyBuffer: Operation[],
     isNoop: boolean = false,
   ) {
-    super(OperationType.DELETE, position, timestamp, historyBuffer, isNoop);
+    super(OperationType.DELETE, position, id, siteId, historyBuffer, isNoop);
   }
 }

@@ -1,6 +1,7 @@
 import { Operation, Insert, Delete } from '../src/types';
 
 export const checkOperationEquality = (a: Operation, b: Operation): void => {
+  expect(a.t).toBe(b.t);
   expect(a.p).toBe(b.p);
   expect(a.isNoop).toBe(b.isNoop);
   expect(a.ts).toBe(b.ts);

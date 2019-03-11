@@ -12,58 +12,59 @@ import { Arbiter, Operation, Insert, Delete } from 'types';
  */
 export const inclusionTransform = (op1: Operation, op2: Operation, side: Arbiter): Operation => {
   if (op1.isNoop) {
-    if (op1 instanceof Delete && op2 instanceof Insert && op1.p === op2.p) {
-      return new Delete(op1.p, op1.ts, op1.hb);
+    if (op1 instanceof Delete && op2 instanceof Insert && op1.position === op2.position) {
+      return new Delete(op1.position, op1.id, op1.historyBuffer);
     }
 
     return op1;
   }
 
   if (op2.isNoop) {
-    if (op1 instanceof Insert && op2 instanceof Delete && op1.p === op2.auxPos) {
-      return new Insert(op1.c, op1.p, op1.ts, op1.hb, true);
+    if (op1 instanceof Insert && op2 instanceof Delete && op1.position === op2.auxPos) {
+      return new Insert(op1.char, op1.position, op1.id, op1.historyBuffer, true);
     }
 
     return op1;
   }
 
   if (op1 instanceof Insert && op2 instanceof Insert) {
-    if (op1.p < op2.p || (op1.p === op2.p && side === Arbiter.LEFT)) {
-      return new Insert(op1.c, op1.auxPos, op1.ts, op1.hb);
+    if (op1.position < op2.position || (op1.position === op2.position && side === Arbiter.LEFT)) {
+      return new Insert(op1.char, op1.auxPos, op1.id, op1.historyBuffer);
     }
 
-    return new Insert(op1.c, op1.auxPos + 1, op1.ts, op1.hb);
+    const pos = Math.min(op1.position, op1.auxPos) + 1;
+    return new Insert(op1.char, pos, op1.id, op1.historyBuffer);
   }
 
   if (op1 instanceof Insert && op2 instanceof Delete) {
-    if (op1.p <= op2.p) {
+    if (op1.position <= op2.position) {
       return op1;
     }
 
-    const op3 = new Insert(op1.c, op1.p - 1, op1.ts, op1.hb);
-    op3.auxPos = op1.p;
+    const op3 = new Insert(op1.char, op1.position - 1, op1.id, op1.historyBuffer);
+    op3.auxPos = op1.position;
     return op3;
   }
 
   if (op1 instanceof Delete && op2 instanceof Insert) {
-    if (op1.p < op2.p) {
+    if (op1.position < op2.position) {
       return op1;
     }
 
-    return new Delete(op1.p + 1, op1.ts, op1.hb);
+    return new Delete(op1.position + 1, op1.id, op1.historyBuffer);
   }
 
   if (op1 instanceof Delete && op2 instanceof Delete) {
-    if (op1.p === op2.p) {
-      return new Delete(op1.p, op1.ts, op1.hb, true);
+    if (op1.position === op2.position) {
+      return new Delete(op1.position, op1.id, op1.historyBuffer, true);
     }
 
-    if (op1.p < op2.p) {
+    if (op1.position < op2.position) {
       return op1;
     }
 
-    const op3 = new Delete(op1.p - 1, op1.ts, op1.hb);
-    op3.auxPos = op1.p;
+    const op3 = new Delete(op1.position - 1, op1.id, op1.historyBuffer);
+    op3.auxPos = op1.position;
     return op3;
   }
 
@@ -82,16 +83,16 @@ export const inclusionTransform = (op1: Operation, op2: Operation, side: Arbiter
  */
 export const exclusionTransform = (op1: Operation, op2: Operation, side: Arbiter): Operation => {
   if (op1.isNoop) {
-    if (op2.isNoop && op1.p === op2.p && op1 instanceof Insert && op2 instanceof Delete) {
-      return new Insert(op1.c, op1.p, op1.ts, op1.hb);
+    if (op2.isNoop && op1.position === op2.position && op1 instanceof Insert && op2 instanceof Delete) {
+      return new Insert(op1.char, op1.position, op1.id, op1.historyBuffer);
     }
 
-    if (op1.p === op2.p && op1 instanceof Delete && op2 instanceof Delete) {
-      return new Delete(op1.p, op1.ts, op1.hb);
+    if (op1.position === op2.position && op1 instanceof Delete && op2 instanceof Delete) {
+      return new Delete(op1.position, op1.id, op1.historyBuffer);
     }
 
     if (op1 instanceof Delete && op2 instanceof Insert) {
-      const op = new Delete(op1.p, op1.ts, op1.hb, true);
+      const op = new Delete(op1.position, op1.id, op1.historyBuffer, true);
       op.auxPos = -1;
       return op;
     }
@@ -104,54 +105,54 @@ export const exclusionTransform = (op1: Operation, op2: Operation, side: Arbiter
   }
 
   if (op1 instanceof Insert && op2 instanceof Insert) {
-    if (op1.p === op2.p && side === Arbiter.RIGHT) {
-      const op3 = new Insert(op1.c, op1.p, op1.ts, op1.hb);
-      op3.auxPos = op1.p - 1;
+    if (op1.position === op2.position && side === Arbiter.RIGHT) {
+      const op3 = new Insert(op1.char, op1.position, op1.id, op1.historyBuffer);
+      op3.auxPos = op1.position - 1;
       return op3;
     }
 
-    if (op1.p <= op2.p) {
+    if (op1.position <= op2.position) {
       return op1;
     }
 
-    const op3 = new Insert(op1.c, op1.p - 1, op1.ts, op1.hb);
+    const op3 = new Insert(op1.char, op1.position - 1, op1.id, op1.historyBuffer);
     if (side === Arbiter.LEFT) {
-      op3.auxPos = op1.p;
+      op3.auxPos = op1.position;
     }
 
     return op3;
   }
 
   if (op1 instanceof Insert && op2 instanceof Delete) {
-    if (op1.p === op2.p) {
-      return new Insert(op1.c, op1.auxPos, op1.ts, op1.hb);
+    if (op1.position === op2.position) {
+      return new Insert(op1.char, op1.auxPos, op1.id, op1.historyBuffer);
     }
 
-    if (op1.p < op2.p) {
+    if (op1.position < op2.position) {
       return op1;
     }
 
-    return new Insert(op1.c, op1.p + 1, op1.ts, op1.hb);
+    return new Insert(op1.char, op1.position + 1, op1.id, op1.historyBuffer);
   }
 
   if (op1 instanceof Delete && op2 instanceof Insert) {
-    if (op1.p === op2.p) {
-      return new Delete(op1.p, op1.ts, op1.hb, true);
+    if (op1.position === op2.position) {
+      return new Delete(op1.position, op1.id, op1.historyBuffer, true);
     }
 
-    if (op1.p < op2.p) {
+    if (op1.position < op2.position) {
       return op1;
     }
 
-    return new Delete(op1.p - 1, op1.ts, op1.hb);
+    return new Delete(op1.position - 1, op1.id, op1.historyBuffer);
   }
 
   if (op1 instanceof Delete && op2 instanceof Delete) {
-    if (op1.p >= op2.p) {
-      return new Delete(op1.p + 1, op1.ts, op1.hb);
+    if (op1.position >= op2.position) {
+      return new Delete(op1.position + 1, op1.id, op1.historyBuffer);
     }
 
-    return new Delete(op1.p, op1.ts, op1.hb);
+    return new Delete(op1.position, op1.id, op1.historyBuffer);
   }
 
   return op1;

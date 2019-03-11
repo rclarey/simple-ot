@@ -131,6 +131,21 @@ export const itCases = [
     op2: { p: 1, ts: 0, t: OperationType.INSERT, hb: [], auxPos: 0, isNoop: false },
     op3: { p: 1, ts: 0, t: OperationType.INSERT, hb: [], auxPos: 0, isNoop: false },
   },
+
+  {
+    name: 'I(noop), op2 arbitrary',
+    side: Arbiter.LEFT,
+    op1: new Insert('a', 1, 0, [], true),
+    op2: new Insert('b', 1, 1, []),
+    op3: new Insert('a', 1, 0, [], true),
+  },
+  {
+    name: 'D(noop)!=I',
+    side: Arbiter.LEFT,
+    op1: new Delete(0, 0, [], true),
+    op2: new Insert('b', 1, 1, []),
+    op3: new Delete(0, 0, [], true),
+  },
 ];
 
 export const etCases = [
@@ -277,5 +292,27 @@ export const etCases = [
     op1: { p: 1, ts: 0, t: OperationType.INSERT, hb: [], auxPos: 0, isNoop: false },
     op2: { p: 1, ts: 0, t: OperationType.INSERT, hb: [], auxPos: 0, isNoop: false },
     op3: { p: 1, ts: 0, t: OperationType.INSERT, hb: [], auxPos: 0, isNoop: false },
+  },
+
+  {
+    name: 'yesop, noop 1',
+    side: Arbiter.LEFT,
+    op1: new Insert('w', 3, 0, []),
+    op2: new Delete(0, 0, [], true),
+    op3: new Insert('w', 3, 0, []),
+  },
+  {
+    name: 'yesop, noop 2',
+    side: Arbiter.LEFT,
+    op1: new Delete(3, 0, []),
+    op2: new Insert('a', 3, 0, [], true),
+    op3: new Delete(3, 0, []),
+  },
+  {
+    name: 'yesop, noop 3',
+    side: Arbiter.LEFT,
+    op1: new Delete(3, 0, []),
+    op2: new Insert('a', 5, 0, [], true),
+    op3: new Delete(3, 0, []),
   },
 ];
