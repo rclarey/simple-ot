@@ -1,8 +1,3 @@
-export enum Arbiter {
-  LEFT = 'l',
-  RIGHT = 'r',
-}
-
 export enum OperationType {
   INSERT = 'i',
   DELETE = 'd',

@@ -1,4 +1,4 @@
-import { Arbiter, Operation, OperationType, Insert, Delete } from 'types';
+import { Operation, OperationType, Insert, Delete } from 'types';
 
 /**
  * The class to be used as a singleton object to perform operational transform tasks at a
@@ -14,15 +14,15 @@ export class OT {
   /** The history buffer at this site */
   public historyBuffer: Operation[] = [];
   /**
-   * @param {(op1: Operation, op2: Operation, side: Arbiter) => Operation} inclusionTransform
+   * @param {(op1: Operation, op2: Operation) => Operation} inclusionTransform
    *   - the inclusion transformation function to use
-   * @param {(op1: Operation, op2: Operation, side: Arbiter) => Operation} exclusionTransform
+   * @param {(op1: Operation, op2: Operation) => Operation} exclusionTransform
    *   - the exclusion transformation function to use
    * @param {number} siteId - the id of the site at which this is being run. Used for arbitration
    */
   constructor(
-    private inclusionTransform: (op1: Operation, op2: Operation, side: Arbiter) => Operation,
-    private exclusionTransform: (op1: Operation, op2: Operation, side: Arbiter) => Operation,
+    private inclusionTransform: (op1: Operation, op2: Operation) => Operation,
+    private exclusionTransform: (op1: Operation, op2: Operation) => Operation,
     public siteID: number,
   ) {}
 
@@ -55,9 +55,8 @@ export class OT {
    * @returns {[Operation, Operation]} the two input operations, swapped
    */
   public transpose(op1: Operation, op2: Operation): [Operation, Operation] {
-    const side = op1.position === op2.position ? Arbiter.RIGHT : Arbiter.LEFT;
-    const op2Prime = this.exclusionTransform(op2, op1, Arbiter.LEFT);
-    const op1Prime = this.inclusionTransform(op1, op2Prime, side);
+    const op2Prime = this.exclusionTransform(op2, op1);
+    const op1Prime = this.inclusionTransform(op1, op2Prime);
     return [op2Prime, op1Prime];
   }
 
@@ -90,8 +89,7 @@ export class OT {
     // transform operation from `start` to `end` in order
     for (let i = start; i < this.historyBuffer.length; i += 1) {
       const op2 = this.historyBuffer[i];
-      const side = operation.siteID < op2.siteID ? Arbiter.LEFT : Arbiter.RIGHT;
-      transformed = this.inclusionTransform(transformed, op2, side);
+      transformed = this.inclusionTransform(transformed, op2);
     }
 
     return transformed;

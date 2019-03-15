@@ -5,7 +5,7 @@ import { checkOperationEquality, applyOps } from './common';
 import { transposeCases, listTransposeCases } from './controlCases';
 
 const alphabet = 'qwertyuiopasdfghjklzxcvbnm';
-const randomTestLimit = 1;
+const randomTestLimit = 1000;
 
 const makeRaw = (op: Operation): Operation => {
   return JSON.parse(JSON.stringify(op));
@@ -67,7 +67,7 @@ describe('helpers', () => {
         new Insert('x', 7, 0, 0, []),
       ]);
 
-      expect(applyBadOp).toThrow('op.p=7 is out of bounds in abcdzy');
+      expect(applyBadOp).toThrow('op.position=7 is out of bounds in abcdzy');
     });
 
     it('should properly apply Inserts and Deletes', () => {
@@ -84,22 +84,11 @@ describe('helpers', () => {
 
 describe('OT', () => {
   describe('operationsAreIndependent', () => {
-    it('should return true if op2 does not appear in op1\'s history buffer - 1', () => {
+    it('should return true if op2 does not appear in op1\'s history buffer', () => {
       const op1 = new Delete(0, 0, 0, [
         new Insert('a', 1, 1, 0, []),
         new Delete(7, 2, 0, []),
         new Delete(4, 4, 0, []),
-      ]);
-      const op2 = new Insert('b', 2, 3, 0, []);
-
-      expect(OT.operationsAreIndependent(op1, op2)).toBe(true);
-    });
-
-    it('should return true if op2 does not appear in op1\'s history buffer - 2', () => {
-      const op1 = new Delete(0, 0, 0, [
-        new Insert('a', 1, 1, 0, []),
-        new Delete(7, 2, 0, []),
-        new Delete(4, 3, 0, []),
       ]);
       const op2 = new Insert('b', 2, 3, 0, []);
 
@@ -121,6 +110,7 @@ describe('OT', () => {
 
   describe('transpose', () => {
     for (const testCase of transposeCases) {
+      if (testCase.name === 'I=I') debugger;
       const ot = new OT(inclusionTransform, exclusionTransform, 0);
       const [op2Prime, op1Prime] = ot.transpose(testCase.op1, testCase.op2);
 
@@ -139,7 +129,10 @@ describe('OT', () => {
       it(`should transpose the list correctly in the ${testCase.name} case`, () => {
         const ot = new OT(inclusionTransform, exclusionTransform, 0);
         ot.historyBuffer = testCase.hb;
+        // const before = applyOps(testCase.str, ot.historyBuffer);
         ot.listTranspose(testCase.start, testCase.end);
+        // const after = applyOps(testCase.str, ot.historyBuffer);
+        // expect(before).toEqual(after);
         expect(applyOps(testCase.str, ot.historyBuffer)).toEqual(testCase.out);
       });
     }
@@ -209,11 +202,12 @@ describe('OT', () => {
       const second = new Insert('d', 0, 1, 0, [first]);
       const third = new Delete(1, 2, 0, [first, second]);
       const fourth = new Insert('a', 0, 3, 0, [first, second, third]);
-      const fifth = new Insert('b', 2, 4, 0, [first, second, third, fourth]);
-      ot.historyBuffer = [first, second, third, fourth, fifth];
+      const fifthFull = new Insert('b', 2, 4, 0, [first, second, third, fourth]);
+      const fifthOp = new Insert('b', 1, 4, 0, [first, second, third, fourth]);
+      ot.historyBuffer = [first, second, third, fourth, fifthFull];
 
-      const op = new Delete(2, 5, 1, [first, second, fifth]);
-      const expected = new Delete(2, 5, 1, [first, second, fifth]);
+      const op = new Delete(1, 5, 1, [first, second, fifthOp]);
+      const expected = new Delete(2, 5, 1, [first, second, fifthOp]);
       const transformed = ot.goto(makeRaw(op));
 
       checkOperationEquality(transformed, expected);
@@ -257,8 +251,6 @@ describe('OT', () => {
       const result1 = applyOps('', site1.historyBuffer);
       const result2 = applyOps('', site2.historyBuffer);
       const result3 = applyOps('', site3.historyBuffer);
-
-      console.log(result0, result1, result2, result3);
 
       expect(result0).toEqual(result1);
       expect(result1).toEqual(result2);

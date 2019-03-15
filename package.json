@@ -17,7 +17,7 @@
     "typescript": "^2.9.2"
   },
   "jest": {
-    "collectCoverage": true,
+    "collectCoverage": false,
     "coverageDirectory": "<rootDir>/coverage/",
     "transform": {
       "^.+\\.ts$": "ts-jest"
