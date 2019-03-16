@@ -84,6 +84,30 @@ describe('OT', () => {
     });
   });
 
+  describe('history', () => {
+    it('should return the ids of the operations in historyBuffer', () => {
+      const ot = new OT(inclusionTransform, exclusionTransform, 0);
+      ot.historyBuffer = [
+        new Delete(0, 5, 0, []),
+        new Insert('a', 1, 7, 0, []),
+        new Delete(1, 3, 0, []),
+      ];
+      const history = ot.history();
+
+      expect(history).toHaveLength(3);
+      expect(history[0]).toBe(5);
+      expect(history[1]).toBe(7);
+      expect(history[2]).toBe(3);
+    });
+
+    it('should return an empty array when historyBuffer is empty', () => {
+      const ot = new OT(inclusionTransform, exclusionTransform, 0);
+      const history = ot.history();
+
+      expect(history).toHaveLength(0);
+    });
+  });
+
   describe('transpose', () => {
     for (const testCase of transposeCases) {
       const ot = new OT(inclusionTransform, exclusionTransform, 0);

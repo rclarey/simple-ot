@@ -65,6 +65,16 @@ export class OT<T extends IOperation> {
   ) {}
 
   /**
+   * Create an array of the IDs of the operations in `this.historyBuffer`.
+   * This array can be used to set the `historyBuffer` field of newly created operations.
+   *
+   * @returns {number[]} the IDs of the operations in `this.historyBuffer`
+   */
+  public history(): number[] {
+    return this.historyBuffer.map(op => op.id);
+  }
+
+  /**
    * Swap two operations in an execution context
    *
    * @param {T} op1 - the operation that occurs earlier in the execution context

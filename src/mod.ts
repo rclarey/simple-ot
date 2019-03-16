@@ -4,8 +4,10 @@ import {
   Insert,
   Operation,
   OperationType,
+  deserialize,
   exclusionTransform,
   inclusionTransform,
+  serialize,
 } from './charwise';
 
 export const charwise = {
@@ -13,6 +15,8 @@ export const charwise = {
   Insert,
   Operation,
   OperationType,
+  deserialize,
   exclusionTransform,
   inclusionTransform,
+  serialize,
 };
