@@ -1,15 +1,19 @@
-import { Operation, Insert, Delete } from '../src/types';
+import { Operation, Insert, Delete, ISerializedOperation } from '../src/charwise';
 
-export const checkOperationEquality = (a: Operation, b: Operation): void => {
+export function checkSerializedOperationEquality(
+  a: ISerializedOperation,
+  b: ISerializedOperation,
+): void {
   expect(a.type).toBe(b.type);
   expect(a.position).toBe(b.position);
-  expect(a.isNoop).toBe(b.isNoop);
   expect(a.id).toBe(b.id);
+  expect(a.char).toBe(b.char);
+}
 
-  if (a instanceof Insert && b instanceof Insert) {
-    expect(a.char).toBe(b.char);
-  }
-};
+export function checkOperationEquality(a: Operation, b: Operation): void {
+  checkSerializedOperationEquality(a, b);
+  expect(a.isNoop).toBe(b.isNoop);
+}
 
 export const applyOps = (s: string, ops: Operation[]): string => {
   let out = s;

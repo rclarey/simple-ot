@@ -2,8 +2,8 @@ import { IOperation } from './control';
 
 /** The type of an operation. Either insert or delete */
 export enum OperationType {
-  INSERT = 'i',
   DELETE = 'd',
+  INSERT = 'i',
 }
 
 /** A character-wise plaintext operation */
@@ -155,8 +155,10 @@ export function inclusionTransform(op1: Operation, op2: Operation): Operation {
 export function exclusionTransform(op1: Operation, op2: Operation): Operation {
   if (op1.isNoop) {
     if (
-      op2.isNoop && op1.position === op2.position &&
-      op1 instanceof Insert && op2 instanceof Delete
+      op2.isNoop &&
+      op1.position === op2.position &&
+      op1 instanceof Insert &&
+      op2 instanceof Delete
     ) {
       return new Insert(op1.char, op1.position, op1.id, op1.siteID, op1.historyBuffer);
     }
@@ -190,12 +192,12 @@ export function exclusionTransform(op1: Operation, op2: Operation): Operation {
       return op1;
     }
 
-    const op3 = new Insert(op1.char, op1.position - 1, op1.id, op1.siteID, op1.historyBuffer);
+    const op4 = new Insert(op1.char, op1.position - 1, op1.id, op1.siteID, op1.historyBuffer);
     if (op1.siteID < op2.siteID) {
-      op3.auxPos = op1.position;
+      op4.auxPos = op1.position;
     }
 
-    return op3;
+    return op4;
   }
 
   if (op1 instanceof Insert && op2 instanceof Delete) {
@@ -233,20 +235,46 @@ export function exclusionTransform(op1: Operation, op2: Operation): Operation {
   return op1;
 }
 
-/** Strip fields that are used internally for transforms */
-export function serialize(op: Operation): Operation {
-  delete op.auxPos;
-  delete op.isNoop;
-  return op;
+/**
+ * A stripped down version of the `Operation` class without fields needed only for
+ * internal computations
+ */
+export interface ISerializedOperation extends IOperation {
+  char?: string;
+  position: number;
+  siteID: number;
+  type: OperationType;
 }
 
-/** Give an operation received as JSON over a network correct type information */
-export function deserialize(rawOp: Operation): Operation {
-  if (rawOp.type === OperationType.INSERT) {
-    const op = rawOp as Insert;
-    return new Insert(op.char, op.position, op.id, op.siteID, op.historyBuffer);
+/**
+ * Strip fields that are used internally for transforms
+ *
+ * @param {Operation} operation - the operation to serialize
+ * @returns {ISerializedOperation} `operation` serialized
+ */
+export function serialize(operation: Operation): ISerializedOperation {
+  const { historyBuffer, id, type, position, siteID } = operation;
+  const serialized: ISerializedOperation = { historyBuffer, id, type, position, siteID };
+  if (operation instanceof Insert) {
+    serialized.char = operation.char;
   }
 
-  const op = rawOp as Delete;
-  return new Delete(op.position, op.id, op.siteID, op.historyBuffer);
+  return serialized;
+}
+
+/**
+ * Give an operation received as JSON over a network correct type information
+ *
+ * @param {ISerializedOperation} serialized - the operation to deserialize
+ * @returns {Operation} `serialized` recreated as an instance of either `Insert`
+ *   or `Delete` as appropriate
+ */
+export function deserialize(serialized: ISerializedOperation): Operation {
+  if (serialized.type === OperationType.INSERT) {
+    const ins = serialized as Insert;
+    return new Insert(ins.char, ins.position, ins.id, ins.siteID, ins.historyBuffer);
+  }
+
+  const del = serialized as Delete;
+  return new Delete(del.position, del.id, del.siteID, del.historyBuffer);
 }

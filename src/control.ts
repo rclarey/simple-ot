@@ -27,23 +27,7 @@ export interface IOperation {
  * Provided `inclusionTransform` and `exclusionTransform` functions should satisfy the TP1 and TP2
  * describe at https://en.wikipedia.org/wiki/Operational_transformation#Transformation_properties
  */
-export class OT {
-  /** The history buffer at this site */
-  public historyBuffer: IOperation[] = [];
-  /**
-   * @param {(op1: IOperation, op2: IOperation) => IOperation} inclusionTransform
-   *   - the inclusion transformation function to use
-   * @param {(op1: IOperation, op2: IOperation) => IOperation} exclusionTransform
-   *   - the exclusion transformation function to use
-   * @param {number} siteID - the id of the site at which this is being run. May be used
-   *   for arbitration.
-   */
-  constructor(
-    private inclusionTransform: (op1: IOperation, op2: IOperation) => IOperation,
-    private exclusionTransform: (op1: IOperation, op2: IOperation) => IOperation,
-    public siteID: number,
-  ) {}
-
+export class OT<T extends IOperation> {
   /**
    * Check if `op1` is dependent on or independent of `op2`.
    *
@@ -55,8 +39,7 @@ export class OT {
    * @returns true if `op1` is independent of `op2`; false if `op1` is dependent on `op2`
    */
   public static operationsAreIndependent(op1: IOperation, op2: IOperation): boolean {
-    for (let i = 0; i < op1.historyBuffer.length; i += 1) {
-      const id = op1.historyBuffer[i];
+    for (const id of op1.historyBuffer) {
       if (id === op2.id && id === op2.id) {
         return false;
       }
@@ -65,14 +48,30 @@ export class OT {
     return true;
   }
 
+  /** The history buffer at this site */
+  public historyBuffer: T[] = [];
+  /**
+   * @param {(op1: T, op2: T) => T} inclusionTransform
+   *   - the inclusion transformation function to use
+   * @param {(op1: T, op2: T) => T} exclusionTransform
+   *   - the exclusion transformation function to use
+   * @param {number} siteID - the id of the site at which this is being run. May be used
+   *   for arbitration.
+   */
+  constructor(
+    private inclusionTransform: (op1: T, op2: T) => T,
+    private exclusionTransform: (op1: T, op2: T) => T,
+    public siteID: number,
+  ) {}
+
   /**
    * Swap two operations in an execution context
    *
-   * @param {IOperation} op1 - the operation that occurs earlier in the execution context
-   * @param {IOperation} op2 - the operation that occurs later in the execution context
-   * @returns {[IOperation, IOperation]} the two input operations, swapped
+   * @param {T} op1 - the operation that occurs earlier in the execution context
+   * @param {T} op2 - the operation that occurs later in the execution context
+   * @returns {[T, T]} the two input operations, swapped
    */
-  public transpose(op1: IOperation, op2: IOperation): [IOperation, IOperation] {
+  public transpose(op1: T, op2: T): [T, T] {
     const op2Prime = this.exclusionTransform(op2, op1);
     const op1Prime = this.inclusionTransform(op1, op2Prime);
     return [op2Prime, op1Prime];
@@ -96,12 +95,12 @@ export class OT {
   /**
    * Perform inclusion transforms on `operation` against the operations from `start` to
    * the end of `historyBuffer`
-   * @param {IOperation} operation - the operation to transform
+   * @param {T} operation - the operation to transform
    * @param {number} start - index to start at
-   * @returns {IOperation} the result of `operation` transformed against `historyBuffer` from
+   * @returns {T} the result of `operation` transformed against `historyBuffer` from
    *   `start` to its end
    */
-  public listInclusionTransform(operation: IOperation, start: number): IOperation {
+  public listInclusionTransform(operation: T, start: number): T {
     let transformed = operation;
 
     // transform operation from `start` to `end` in order
@@ -118,10 +117,10 @@ export class OT {
    * More specifically, given `operation` and an execution context, `historyBuffer`,
    * generate the execution form of `operation`
    *
-   * @param {IOperation} operation - operation we want to execute
-   * @returns {IOperation} `operation` transformed so that it can be executed in `historyBuffer`
+   * @param {T} operation - operation we want to execute
+   * @returns {T} `operation` transformed so that it can be executed in `historyBuffer`
    */
-  public goto(operation: IOperation): IOperation {
+  public goto(operation: T): T {
     // find the first operation that is independent with `operation`
     let k = -1;
     for (let i = 0; i < this.historyBuffer.length; i += 1) {

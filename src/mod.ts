@@ -1,14 +1,18 @@
 export { IOperation, OT } from './control';
 import {
-  exclusionTransform,
-  inclusionTransform,
+  Delete,
+  Insert,
   Operation,
   OperationType,
+  exclusionTransform,
+  inclusionTransform,
 } from './charwise';
 
 export const charwise = {
-  exclusionTransform,
-  inclusionTransform,
+  Delete,
+  Insert,
   Operation,
   OperationType,
+  exclusionTransform,
+  inclusionTransform,
 };

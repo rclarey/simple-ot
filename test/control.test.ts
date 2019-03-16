@@ -1,21 +1,16 @@
-import { Insert, Delete, Operation } from '../src/types';
+import { Insert, Delete, Operation, inclusionTransform, exclusionTransform } from '../src/charwise';
 import { OT } from '../src/control';
-import { inclusionTransform, exclusionTransform } from '../src/transform';
 import { checkOperationEquality, applyOps } from './common';
 import { transposeCases, listTransposeCases } from './controlCases';
 
 const alphabet = 'qwertyuiopasdfghjklzxcvbnm';
 const randomTestLimit = 1000;
 
-const makeRaw = (op: Operation): Operation => {
-  return JSON.parse(JSON.stringify(op));
-};
-
 const randIntInRange = (start: number, end: number): number => {
   return start + Math.floor(Math.random() * (end - start));
 };
 
-const randomHB = (): { str: string, hb: Operation[] } => {
+const randomHB = (): { str: string; hb: Operation[] } => {
   const hbSize = randIntInRange(4, 10);
   const hb: Operation[] = [];
   let strSize = randIntInRange(4, 10);
@@ -27,21 +22,10 @@ const randomHB = (): { str: string, hb: Operation[] } => {
 
   for (let i = 0; i < hbSize; i += 1) {
     if (Math.random() < 0.5 || strSize === 0) {
-      hb.push(new Insert(
-        alphabet[randIntInRange(0, 26)],
-        randIntInRange(0, strSize),
-        0,
-        0,
-        [],
-      ));
+      hb.push(new Insert(alphabet[randIntInRange(0, 26)], randIntInRange(0, strSize), 0, 0, []));
       strSize += 1;
     } else {
-      hb.push(new Delete(
-        randIntInRange(0, strSize),
-        0,
-        0,
-        [],
-      ));
+      hb.push(new Delete(randIntInRange(0, strSize), 0, 0, []));
       strSize -= 1;
     }
   }
@@ -61,11 +45,12 @@ describe('helpers', () => {
     });
 
     it('should throw if given bad p value', () => {
-      const applyBadOp = () => applyOps('abcd', [
-        new Insert('z', 4, 0, 0, []),
-        new Insert('y', 5, 0, 0, []),
-        new Insert('x', 7, 0, 0, []),
-      ]);
+      const applyBadOp = () =>
+        applyOps('abcd', [
+          new Insert('z', 4, 0, 0, []),
+          new Insert('y', 5, 0, 0, []),
+          new Insert('x', 7, 0, 0, []),
+        ]);
 
       expect(applyBadOp).toThrow('op.position=7 is out of bounds in abcdzy');
     });
@@ -84,24 +69,15 @@ describe('helpers', () => {
 
 describe('OT', () => {
   describe('operationsAreIndependent', () => {
-    it('should return true if op2 does not appear in op1\'s history buffer', () => {
-      const op1 = new Delete(0, 0, 0, [
-        new Insert('a', 1, 1, 0, []),
-        new Delete(7, 2, 0, []),
-        new Delete(4, 4, 0, []),
-      ]);
+    it("should return true if op2 does not appear in op1's history buffer", () => {
+      const op1 = new Delete(0, 0, 0, [1, 0, 0]);
       const op2 = new Insert('b', 2, 3, 0, []);
 
       expect(OT.operationsAreIndependent(op1, op2)).toBe(true);
     });
 
-    it('should return false if op2 appears in op1\'s history buffer', () => {
-      const op1 = new Delete(0, 0, 0, [
-        new Insert('a', 1, 1, 0, []),
-        new Delete(7, 2, 0, []),
-        new Insert('b', 2, 3, 0, []),
-        new Delete(4, 4, 0, []),
-      ]);
+    it("should return false if op2 appears in op1's history buffer", () => {
+      const op1 = new Delete(0, 0, 0, [1, 0, 3, 0]);
       const op2 = new Insert('b', 2, 3, 0, []);
 
       expect(OT.operationsAreIndependent(op1, op2)).toBe(false);
@@ -110,7 +86,6 @@ describe('OT', () => {
 
   describe('transpose', () => {
     for (const testCase of transposeCases) {
-      if (testCase.name === 'I=I') debugger;
       const ot = new OT(inclusionTransform, exclusionTransform, 0);
       const [op2Prime, op1Prime] = ot.transpose(testCase.op1, testCase.op2);
 
@@ -138,7 +113,6 @@ describe('OT', () => {
     }
 
     for (let i = 0; i < randomTestLimit; i += 1) {
-
       it('should transpose the list correctly in a random case', () => {
         const ot = new OT(inclusionTransform, exclusionTransform, 0);
         const { str, hb } = randomHB();
@@ -168,14 +142,14 @@ describe('OT', () => {
     it('should pass case 1', () => {
       const ot = new OT(inclusionTransform, exclusionTransform, 0);
       const first = new Insert('x', 0, 0, 0, []);
-      const second = new Insert('d', 0, 1, 0, [first]);
-      const third = new Delete(1, 2, 0, [first, second]);
-      const fourth = new Insert('a', 0, 3, 0, [first, second, third]);
-      const fifth = new Insert('b', 1, 4, 0, [first, second, third, fourth]);
+      const second = new Insert('d', 0, 1, 0, [first.id]);
+      const third = new Delete(1, 2, 0, [first.id, second.id]);
+      const fourth = new Insert('a', 0, 3, 0, [first.id, second.id, third.id]);
+      const fifth = new Insert('b', 1, 4, 0, [first.id, second.id, third.id, fourth.id]);
       ot.historyBuffer = [first, second, third, fourth, fifth];
 
-      const op = new Insert('c', 2, 5, 1, ot.historyBuffer.slice());
-      const transformed = ot.goto(makeRaw(op));
+      const op = new Insert('c', 2, 5, 1, ot.historyBuffer.map(o => o.id));
+      const transformed = ot.goto(op);
 
       checkOperationEquality(transformed, op);
     });
@@ -183,15 +157,15 @@ describe('OT', () => {
     it('should pass case 2', () => {
       const ot = new OT(inclusionTransform, exclusionTransform, 1);
       const first = new Insert('x', 0, 0, 1, []);
-      const second = new Insert('d', 0, 1, 1, [first]);
-      const third = new Delete(1, 2, 1, [first, second]);
-      const fourth = new Insert('a', 0, 3, 1, [first, second, third]);
-      const fifth = new Insert('b', 2, 4, 1, [first, second, third, fourth]);
+      const second = new Insert('d', 0, 1, 1, [first.id]);
+      const third = new Delete(1, 2, 1, [first.id, second.id]);
+      const fourth = new Insert('a', 0, 3, 1, [first.id, second.id, third.id]);
+      const fifth = new Insert('b', 2, 4, 1, [first.id, second.id, third.id, fourth.id]);
       ot.historyBuffer = [first, second, third, fourth, fifth];
 
-      const op = new Insert('c', 2, 5, 0, [first, second]);
-      const expected = new Insert('c', 2, 5, 0, [first, second]);
-      const transformed = ot.goto(makeRaw(op));
+      const op = new Insert('c', 2, 5, 0, [first.id, second.id]);
+      const expected = new Insert('c', 2, 5, 0, [first.id, second.id]);
+      const transformed = ot.goto(op);
 
       checkOperationEquality(transformed, expected);
     });
@@ -199,16 +173,16 @@ describe('OT', () => {
     it('should pass case 3', () => {
       const ot = new OT(inclusionTransform, exclusionTransform, 0);
       const first = new Insert('x', 0, 0, 0, []);
-      const second = new Insert('d', 0, 1, 0, [first]);
-      const third = new Delete(1, 2, 0, [first, second]);
-      const fourth = new Insert('a', 0, 3, 0, [first, second, third]);
-      const fifthFull = new Insert('b', 2, 4, 0, [first, second, third, fourth]);
-      const fifthOp = new Insert('b', 1, 4, 0, [first, second, third, fourth]);
+      const second = new Insert('d', 0, 1, 0, [first.id]);
+      const third = new Delete(1, 2, 0, [first.id, second.id]);
+      const fourth = new Insert('a', 0, 3, 0, [first.id, second.id, third.id]);
+      const fifthFull = new Insert('b', 2, 4, 0, [first.id, second.id, third.id, fourth.id]);
+      const fifthOp = new Insert('b', 1, 4, 0, [first.id, second.id, third.id, fourth.id]);
       ot.historyBuffer = [first, second, third, fourth, fifthFull];
 
-      const op = new Delete(1, 5, 1, [first, second, fifthOp]);
-      const expected = new Delete(2, 5, 1, [first, second, fifthOp]);
-      const transformed = ot.goto(makeRaw(op));
+      const op = new Delete(1, 5, 1, [first.id, second.id, fifthOp.id]);
+      const expected = new Delete(2, 5, 1, [first.id, second.id, fifthOp.id]);
+      const transformed = ot.goto(op);
 
       checkOperationEquality(transformed, expected);
     });
@@ -226,26 +200,26 @@ describe('OT', () => {
       site2.historyBuffer.push(o0);
       site3.historyBuffer.push(o0);
 
-      const o2 = new Insert('y', 1, 1, 2, site2.historyBuffer.slice());
-      const o3 = new Insert('z', 1, 2, 3, site3.historyBuffer.slice());
+      const o2 = new Insert('y', 1, 1, 2, site2.historyBuffer.map(o => o.id));
+      const o3 = new Insert('z', 1, 2, 3, site3.historyBuffer.map(o => o.id));
       site2.historyBuffer.push(o2);
       site3.historyBuffer.push(o3);
 
-      server.historyBuffer.push(server.goto(makeRaw(o2)));
-      server.historyBuffer.push(server.goto(makeRaw(o3)));
+      server.historyBuffer.push(server.goto(o2));
+      server.historyBuffer.push(server.goto(o3));
 
-      site2.historyBuffer.push(site2.goto(makeRaw(o3)));
-      site1.historyBuffer.push(site1.goto(makeRaw(o3)));
+      site2.historyBuffer.push(site2.goto(o3));
+      site1.historyBuffer.push(site1.goto(o3));
 
-      const o1 = new Insert('x', 1, 3, 1, site1.historyBuffer.slice());
+      const o1 = new Insert('x', 1, 3, 1, site1.historyBuffer.map(o => o.id));
       site1.historyBuffer.push(o1);
 
-      server.historyBuffer.push(server.goto(makeRaw(o1)));
-      site2.historyBuffer.push(site2.goto(makeRaw(o1)));
-      site3.historyBuffer.push(site3.goto(makeRaw(o1)));
+      server.historyBuffer.push(server.goto(o1));
+      site2.historyBuffer.push(site2.goto(o1));
+      site3.historyBuffer.push(site3.goto(o1));
 
-      site1.historyBuffer.push(site1.goto(makeRaw(o2)));
-      site3.historyBuffer.push(site3.goto(makeRaw(o2)));
+      site1.historyBuffer.push(site1.goto(o2));
+      site3.historyBuffer.push(site3.goto(o2));
 
       const result0 = applyOps('', server.historyBuffer);
       const result1 = applyOps('', site1.historyBuffer);
