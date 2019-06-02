@@ -40,7 +40,7 @@ export class OT<T extends IOperation> {
    */
   public static operationsAreIndependent(op1: IOperation, op2: IOperation): boolean {
     for (const id of op1.historyBuffer) {
-      if (id === op2.id && id === op2.id) {
+      if (id === op2.id) {
         return false;
       }
     }
