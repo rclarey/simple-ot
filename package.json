@@ -1,6 +1,6 @@
 {
   "name": "simple-ot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Operational transform using the GOTO control algorithm",
   "author": "Russell Clarey (https://russellclarey.com)",
   "keywords": [
