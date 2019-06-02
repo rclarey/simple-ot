@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/rclarey/simple-ot/issues"
   },
-  "homepage": "https://github.com/rclarey/simple-ot"
+  "homepage": "https://github.com/rclarey/simple-ot",
   "main": "lib/mod.js",
   "types": "lib/mod.d.ts",
   "files": [
