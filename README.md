@@ -67,6 +67,6 @@ ot.historyBuffer.push(transformed);
 ```
 
 ## API
-For the high-level, domain-agnostic control alogrithm see [control.ts](/src/control.ts).
+For the high-level, domain-agnostic control alogrithm see [control.ts](https://github.com/rclarey/simple-ot/blob/master/src/control.ts).
 
-For the implementation of character-wise inclusion and exclusion transformation functions see [charwise.ts](/src/charwise.ts).
+For the implementation of character-wise inclusion and exclusion transformation functions see [charwise.ts](https://github.com/rclarey/simple-ot/blob/master/src/charwise.ts).
