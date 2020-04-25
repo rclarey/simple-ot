@@ -244,7 +244,6 @@ export interface ISerializedOperation extends IOperation {
   position: number;
   siteID: number;
   type: OperationType;
-  historyBuffer: number[];
 }
 
 /**
