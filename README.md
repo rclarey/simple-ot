@@ -53,8 +53,8 @@ sendToOtherSites(serializedLocal);
 // ... some time later we receive an operation from another site
 
 const remoteSerialized = {
-  historyBuffer: [] as number[],
-  id: 1,
+  historyBuffer: [] as string[],
+  id: 'EdSCYG6rxj',
   position: 1,
   siteID: 0,
   type: OperationType.DELETE,
