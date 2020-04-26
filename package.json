@@ -1,12 +1,15 @@
 {
   "name": "simple-ot",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Operational transform using the GOTO control algorithm",
   "author": "Russell Clarey (https://russellclarey.com)",
   "keywords": [
     "operational transform",
     "OT"
   ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/rclarey/simple-ot.git"
@@ -15,16 +18,17 @@
     "url": "https://github.com/rclarey/simple-ot/issues"
   },
   "homepage": "https://github.com/rclarey/simple-ot",
-  "main": "lib/mod.js",
-  "types": "lib/mod.d.ts",
+  "main": "dist/mod.js",
+  "types": "dist/mod.d.ts",
   "files": [
-    "lib/**/*"
+    "dist/**/*"
   ],
   "scripts": {
+    "copy": "cp ./src/*.ts ./dist/",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
-    "prepare": "yarn run lint && yarn run test && yarn run build",
+    "prepare": "yarn run lint && yarn run test && yarn run build && yarn run copy",
     "test": "jest --coverage"
   },
   "license": "MIT",

@@ -44,19 +44,19 @@ describe('exclusionTransform', () => {
   }
 });
 
-const del = new Delete(1, 1, 0, []);
-const ins = new Insert('a', 1, 0, 0, []);
+const del = new Delete(1, '1', 0, []);
+const ins = new Insert('a', 1, '0', 0, []);
 const serialDel = {
-  historyBuffer: [] as number[],
-  id: 1,
+  historyBuffer: [] as string[],
+  id: '1',
   position: 1,
   siteID: 0,
   type: OperationType.DELETE,
 };
 const serialIns = {
   char: 'a',
-  historyBuffer: [] as number[],
-  id: 0,
+  historyBuffer: [] as string[],
+  id: '0',
   position: 1,
   siteID: 0,
   type: OperationType.INSERT,
