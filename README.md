@@ -9,6 +9,8 @@ The implementation of the GOTO algorithm was written based on [this paper](https
 
 This repository also contains an implementation of inclusion and exclusion transformation functions, for character-wise operations on plaintext documents, that can be used with the GOTO algorithm.
 
+For an example application using this library, see [cloudcode](https://github.com/rclarey/cloudcode).
+
 ## Install
 
 ```bash
