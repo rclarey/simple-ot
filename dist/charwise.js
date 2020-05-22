@@ -27,13 +27,15 @@ export class Delete extends Operation {
 }
 export function inclusionTransform(op1, op2) {
     if (op1.isNoop) {
-        if (op1 instanceof Delete && op2 instanceof Insert && op1.position === op2.position) {
+        if (op1 instanceof Delete && op2 instanceof Insert &&
+            op1.position === op2.position) {
             return new Delete(op1.position, op1.id, op1.siteID, op1.historyBuffer);
         }
         return op1;
     }
     if (op2.isNoop) {
-        if (op1 instanceof Insert && op2 instanceof Delete && op1.position === op2.auxPos) {
+        if (op1 instanceof Insert && op2 instanceof Delete &&
+            op1.position === op2.auxPos) {
             return new Insert(op1.char, op1.position, op1.id, op1.siteID, op1.historyBuffer, true);
         }
         return op1;
@@ -81,7 +83,8 @@ export function exclusionTransform(op1, op2) {
             op2 instanceof Delete) {
             return new Insert(op1.char, op1.position, op1.id, op1.siteID, op1.historyBuffer);
         }
-        if (op1.position === op2.position && op1 instanceof Delete && op2 instanceof Delete) {
+        if (op1.position === op2.position && op1 instanceof Delete &&
+            op2 instanceof Delete) {
             return new Delete(op1.position, op1.id, op1.siteID, op1.historyBuffer);
         }
         if (op1 instanceof Delete && op2 instanceof Insert) {
@@ -138,7 +141,13 @@ export function exclusionTransform(op1, op2) {
 }
 export function serialize(operation) {
     const { historyBuffer, id, type, position, siteID } = operation;
-    const serialized = { historyBuffer, id, type, position, siteID };
+    const serialized = {
+        historyBuffer,
+        id,
+        type,
+        position,
+        siteID,
+    };
     if (operation instanceof Insert) {
         serialized.char = operation.char;
     }

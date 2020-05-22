@@ -19,31 +19,7 @@
   "types": "dist/mod.d.ts",
   "files": ["dist/**/*"],
   "scripts": {
-    "copy": "cp ./src/*.ts ./dist/",
-    "build": "tsc",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "lint": "tslint -p tsconfig.json",
-    "prepare": "yarn run lint && yarn run test && yarn run build && yarn run copy",
-    "test": "jest --coverage"
+    "prepare": "make test && make build"
   },
-  "license": "MIT",
-  "devDependencies": {
-    "@types/jest": "^23.1.3",
-    "jest": "^23.1.0",
-    "prettier": "^1.16.4",
-    "ts-jest": "^22.4.6",
-    "tslint": "^5.10.0",
-    "tslint-config-prettier": "^1.18.0",
-    "typescript": "^2.9.2"
-  },
-  "jest": {
-    "collectCoverage": false,
-    "coverageDirectory": "<rootDir>/coverage/",
-    "transform": {
-      "^.+\\.ts$": "ts-jest"
-    },
-    "testRegex": "test/.*\\.test\\.ts",
-    "moduleFileExtensions": ["ts", "js"],
-    "modulePaths": ["<rootDir>/src/"]
-  }
+  "license": "MIT"
 }

@@ -1,9 +1,9 @@
-import { IOperation } from './control';
+import { IOperation } from "./control.ts";
 
 /** The type of an operation. Either insert or delete */
 export enum OperationType {
-  DELETE = 'd',
-  INSERT = 'i',
+  DELETE = "d",
+  INSERT = "i",
 }
 
 /** A character-wise plaintext operation */
@@ -82,7 +82,10 @@ export class Delete extends Operation {
  */
 export function inclusionTransform(op1: Operation, op2: Operation): Operation {
   if (op1.isNoop) {
-    if (op1 instanceof Delete && op2 instanceof Insert && op1.position === op2.position) {
+    if (
+      op1 instanceof Delete && op2 instanceof Insert &&
+      op1.position === op2.position
+    ) {
       return new Delete(op1.position, op1.id, op1.siteID, op1.historyBuffer);
     }
 
@@ -90,8 +93,18 @@ export function inclusionTransform(op1: Operation, op2: Operation): Operation {
   }
 
   if (op2.isNoop) {
-    if (op1 instanceof Insert && op2 instanceof Delete && op1.position === op2.auxPos) {
-      return new Insert(op1.char, op1.position, op1.id, op1.siteID, op1.historyBuffer, true);
+    if (
+      op1 instanceof Insert && op2 instanceof Delete &&
+      op1.position === op2.auxPos
+    ) {
+      return new Insert(
+        op1.char,
+        op1.position,
+        op1.id,
+        op1.siteID,
+        op1.historyBuffer,
+        true,
+      );
     }
 
     return op1;
@@ -102,7 +115,13 @@ export function inclusionTransform(op1: Operation, op2: Operation): Operation {
       op1.position < op2.position ||
       (op1.position === op2.position && op1.siteID <= op2.siteID)
     ) {
-      return new Insert(op1.char, op1.auxPos, op1.id, op1.siteID, op1.historyBuffer);
+      return new Insert(
+        op1.char,
+        op1.auxPos,
+        op1.id,
+        op1.siteID,
+        op1.historyBuffer,
+      );
     }
 
     const pos = Math.min(op1.position, op1.auxPos) + 1;
@@ -114,7 +133,13 @@ export function inclusionTransform(op1: Operation, op2: Operation): Operation {
       return op1;
     }
 
-    const op3 = new Insert(op1.char, op1.position - 1, op1.id, op1.siteID, op1.historyBuffer);
+    const op3 = new Insert(
+      op1.char,
+      op1.position - 1,
+      op1.id,
+      op1.siteID,
+      op1.historyBuffer,
+    );
     op3.auxPos = op1.position;
     return op3;
   }
@@ -129,14 +154,25 @@ export function inclusionTransform(op1: Operation, op2: Operation): Operation {
 
   if (op1 instanceof Delete && op2 instanceof Delete) {
     if (op1.position === op2.position) {
-      return new Delete(op1.position, op1.id, op1.siteID, op1.historyBuffer, true);
+      return new Delete(
+        op1.position,
+        op1.id,
+        op1.siteID,
+        op1.historyBuffer,
+        true,
+      );
     }
 
     if (op1.position < op2.position) {
       return op1;
     }
 
-    const op3 = new Delete(op1.position - 1, op1.id, op1.siteID, op1.historyBuffer);
+    const op3 = new Delete(
+      op1.position - 1,
+      op1.id,
+      op1.siteID,
+      op1.historyBuffer,
+    );
     op3.auxPos = op1.position;
     return op3;
   }
@@ -160,15 +196,30 @@ export function exclusionTransform(op1: Operation, op2: Operation): Operation {
       op1 instanceof Insert &&
       op2 instanceof Delete
     ) {
-      return new Insert(op1.char, op1.position, op1.id, op1.siteID, op1.historyBuffer);
+      return new Insert(
+        op1.char,
+        op1.position,
+        op1.id,
+        op1.siteID,
+        op1.historyBuffer,
+      );
     }
 
-    if (op1.position === op2.position && op1 instanceof Delete && op2 instanceof Delete) {
+    if (
+      op1.position === op2.position && op1 instanceof Delete &&
+      op2 instanceof Delete
+    ) {
       return new Delete(op1.position, op1.id, op1.siteID, op1.historyBuffer);
     }
 
     if (op1 instanceof Delete && op2 instanceof Insert) {
-      const op = new Delete(op1.position, op1.id, op1.siteID, op1.historyBuffer, true);
+      const op = new Delete(
+        op1.position,
+        op1.id,
+        op1.siteID,
+        op1.historyBuffer,
+        true,
+      );
       op.auxPos = -1;
       return op;
     }
@@ -182,7 +233,13 @@ export function exclusionTransform(op1: Operation, op2: Operation): Operation {
 
   if (op1 instanceof Insert && op2 instanceof Insert) {
     if (op1.position === op2.position && op1.siteID > op2.siteID) {
-      const op3 = new Insert(op1.char, op1.position, op1.id, op1.siteID, op1.historyBuffer);
+      const op3 = new Insert(
+        op1.char,
+        op1.position,
+        op1.id,
+        op1.siteID,
+        op1.historyBuffer,
+      );
       op3.auxPos = op1.position - 1;
       return op3;
     }
@@ -192,7 +249,13 @@ export function exclusionTransform(op1: Operation, op2: Operation): Operation {
       return op1;
     }
 
-    const op4 = new Insert(op1.char, op1.position - 1, op1.id, op1.siteID, op1.historyBuffer);
+    const op4 = new Insert(
+      op1.char,
+      op1.position - 1,
+      op1.id,
+      op1.siteID,
+      op1.historyBuffer,
+    );
     if (op1.siteID < op2.siteID) {
       op4.auxPos = op1.position;
     }
@@ -202,19 +265,37 @@ export function exclusionTransform(op1: Operation, op2: Operation): Operation {
 
   if (op1 instanceof Insert && op2 instanceof Delete) {
     if (op1.position === op2.position) {
-      return new Insert(op1.char, op1.auxPos, op1.id, op1.siteID, op1.historyBuffer);
+      return new Insert(
+        op1.char,
+        op1.auxPos,
+        op1.id,
+        op1.siteID,
+        op1.historyBuffer,
+      );
     }
 
     if (op1.position < op2.position) {
       return op1;
     }
 
-    return new Insert(op1.char, op1.position + 1, op1.id, op1.siteID, op1.historyBuffer);
+    return new Insert(
+      op1.char,
+      op1.position + 1,
+      op1.id,
+      op1.siteID,
+      op1.historyBuffer,
+    );
   }
 
   if (op1 instanceof Delete && op2 instanceof Insert) {
     if (op1.position === op2.position) {
-      return new Delete(op1.position, op1.id, op1.siteID, op1.historyBuffer, true);
+      return new Delete(
+        op1.position,
+        op1.id,
+        op1.siteID,
+        op1.historyBuffer,
+        true,
+      );
     }
 
     if (op1.position < op2.position) {
@@ -226,7 +307,12 @@ export function exclusionTransform(op1: Operation, op2: Operation): Operation {
 
   if (op1 instanceof Delete && op2 instanceof Delete) {
     if (op1.position >= op2.position) {
-      return new Delete(op1.position + 1, op1.id, op1.siteID, op1.historyBuffer);
+      return new Delete(
+        op1.position + 1,
+        op1.id,
+        op1.siteID,
+        op1.historyBuffer,
+      );
     }
 
     return new Delete(op1.position, op1.id, op1.siteID, op1.historyBuffer);
@@ -254,7 +340,13 @@ export interface ISerializedOperation extends IOperation {
  */
 export function serialize(operation: Operation): ISerializedOperation {
   const { historyBuffer, id, type, position, siteID } = operation;
-  const serialized: ISerializedOperation = { historyBuffer, id, type, position, siteID };
+  const serialized: ISerializedOperation = {
+    historyBuffer,
+    id,
+    type,
+    position,
+    siteID,
+  };
   if (operation instanceof Insert) {
     serialized.char = operation.char;
   }
@@ -271,7 +363,13 @@ export function serialize(operation: Operation): ISerializedOperation {
  */
 export function deserialize(op: ISerializedOperation): Operation {
   if (op.type === OperationType.INSERT) {
-    return new Insert(op.char!, op.position, op.id, op.siteID, op.historyBuffer);
+    return new Insert(
+      op.char!,
+      op.position,
+      op.id,
+      op.siteID,
+      op.historyBuffer,
+    );
   }
 
   return new Delete(op.position, op.id, op.siteID, op.historyBuffer);

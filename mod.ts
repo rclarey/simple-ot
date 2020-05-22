@@ -1,4 +1,4 @@
-export { IOperation, OT } from './control';
+export { IOperation, OT } from "./control.ts";
 import {
   Delete,
   Insert,
@@ -8,7 +8,7 @@ import {
   exclusionTransform,
   inclusionTransform,
   serialize,
-} from './charwise';
+} from "./charwise.ts";
 
 export const charwise = {
   Delete,

@@ -1,4 +1,4 @@
-import { IOperation } from './control';
+import { IOperation } from "./control";
 export declare enum OperationType {
     DELETE = "d",
     INSERT = "i"

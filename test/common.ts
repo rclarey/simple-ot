@@ -1,18 +1,27 @@
-import { Operation, Insert, Delete, ISerializedOperation } from '../src/charwise';
+import {
+  assertEquals,
+} from "https://deno.land/std@0.52.0/testing/asserts.ts#^";
+
+import {
+  Operation,
+  Insert,
+  Delete,
+  ISerializedOperation,
+} from "../charwise.ts";
 
 export function checkSerializedOperationEquality(
   a: ISerializedOperation,
   b: ISerializedOperation,
 ): void {
-  expect(a.type).toBe(b.type);
-  expect(a.position).toBe(b.position);
-  expect(a.id).toBe(b.id);
-  expect(a.char).toBe(b.char);
+  assertEquals(a.type, b.type);
+  assertEquals(a.position, b.position);
+  assertEquals(a.id, b.id);
+  assertEquals(a.char, b.char);
 }
 
 export function checkOperationEquality(a: Operation, b: Operation): void {
   checkSerializedOperationEquality(a, b);
-  expect(a.isNoop).toBe(b.isNoop);
+  assertEquals(a.isNoop, b.isNoop);
 }
 
 export const applyOps = (s: string, ops: Operation[]): string => {
@@ -20,10 +29,14 @@ export const applyOps = (s: string, ops: Operation[]): string => {
   for (const op of ops) {
     if (!op.isNoop) {
       if (op.position > out.length) {
-        throw new Error(`op.position=${op.position} is out of bounds in ${out}`);
+        throw new Error(
+          `op.position=${op.position} is out of bounds in ${out}`,
+        );
       } else {
         if (op instanceof Insert) {
-          out = `${out.slice(0, op.position)}${op.char}${out.slice(op.position)}`;
+          out = `${out.slice(0, op.position)}${op.char}${
+            out.slice(op.position)
+          }`;
         }
         if (op instanceof Delete) {
           out = `${out.slice(0, op.position)}${out.slice(op.position + 1)}`;
