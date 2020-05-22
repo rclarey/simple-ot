@@ -9,6 +9,8 @@ The implementation of the GOTO algorithm was written based on [this paper](https
 
 This repository also contains an implementation of inclusion and exclusion transformation functions, for character-wise operations on plaintext documents, that can be used with the GOTO algorithm.
 
+For an example application using this library, see [cloudcode](https://github.com/rclarey/cloudcode).
+
 ## Install
 
 ```bash
@@ -53,8 +55,8 @@ sendToOtherSites(serializedLocal);
 // ... some time later we receive an operation from another site
 
 const remoteSerialized = {
-  historyBuffer: [] as number[],
-  id: 1,
+  historyBuffer: [] as string[],
+  id: 'EdSCYG6rxj',
   position: 1,
   siteID: 0,
   type: OperationType.DELETE,
