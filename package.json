@@ -1,9 +1,12 @@
 {
   "name": "@rclarey/simple-ot",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Operational transform using the GOTO control algorithm",
   "author": "Russell Clarey (https://russellclarey.com)",
-  "keywords": ["operational transform", "OT"],
+  "keywords": [
+    "operational transform",
+    "OT"
+  ],
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
@@ -17,7 +20,9 @@
   "homepage": "https://github.com/rclarey/simple-ot",
   "main": "dist/mod.js",
   "types": "dist/mod.d.ts",
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "prepare": "make test && make build"
   },
